@@ -34,9 +34,16 @@ const formatLogEntry = (entry: LogEntry): string => {
  */
 const createConsoleLogger = (): Logger => {
 	const shouldLog = (level: LogLevel): boolean => {
+		// Suppress all logs in test environment
+		if (process.env.NODE_ENV === "test") {
+			return false;
+		}
+
+		// Only log warnings and errors in production
 		if (process.env.NODE_ENV === "production") {
 			return level === "warn" || level === "error";
 		}
+
 		return true;
 	};
 

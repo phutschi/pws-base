@@ -5,9 +5,10 @@ import { defineConfig } from "vitest/config";
 export default defineConfig({
 	plugins: [react()],
 	test: {
-		environment: "jsdom",
+		environment: "happy-dom",
 		globals: true,
 		setupFiles: ["./src/test/setup.ts"],
+		include: ["src/**/tests/**/*.test.{ts,tsx}"],
 	},
 	resolve: {
 		alias: {

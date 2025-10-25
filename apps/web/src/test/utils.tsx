@@ -1,5 +1,6 @@
 import { render } from "@testing-library/react";
 import type { ReactElement } from "react";
+import { vi } from "vitest";
 import type { AppRouter } from "~/server/api";
 import type { Session, User } from "~/server/auth";
 import type { db } from "~/server/db";
@@ -34,7 +35,7 @@ export const renderWithProviders = (ui: ReactElement) => {
  * Mock database for testing
  */
 export const createMockDb = () => {
-	return {
+	const mockDb = {
 		query: {
 			posts: {
 				findFirst: vi.fn(),
@@ -43,7 +44,9 @@ export const createMockDb = () => {
 		insert: vi.fn(() => ({
 			values: vi.fn(),
 		})),
-	} as unknown as typeof db;
+	};
+
+	return mockDb as unknown as typeof db;
 };
 
 /**
@@ -72,6 +75,8 @@ export const createMockSession = (overrides?: Partial<Session>): Session => {
 		ipAddress: null,
 		userAgent: null,
 		createdAt: new Date(),
+		updatedAt: new Date(),
+		token: "test-token",
 		...overrides,
 	};
 };

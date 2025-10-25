@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { accounts, posts, sessions, users, verifications } from "./schema";
+import { accounts, posts, sessions, users, verifications } from "../schema";
 
 describe("Database Schema", () => {
 	describe("users table", () => {

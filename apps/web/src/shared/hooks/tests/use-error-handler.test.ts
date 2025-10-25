@@ -1,9 +1,9 @@
 import { act, renderHook } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { useErrorHandler } from "./use-error-handler";
+import { useErrorHandler } from "../use-error-handler";
 
 // Mock the error tracker
-vi.mock("../lib/error-tracker", () => ({
+vi.mock("~/shared/lib/error-tracker", () => ({
 	useErrorTracker: () => ({
 		captureException: vi.fn(),
 	}),
