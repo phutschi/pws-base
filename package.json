@@ -1,0 +1,32 @@
+{
+	"name": "pws-base",
+	"module": "index.ts",
+	"type": "module",
+	"private": true,
+	"scripts": {
+		"dev": "turbo dev",
+		"build": "turbo build",
+		"check": "turbo check",
+		"check:types": "turbo check:types",
+		"check:unsafe": "turbo check:unsafe",
+		"check:write": "turbo check:write",
+		"lint": "turbo lint",
+		"prepare": "husky"
+	},
+	"lint-staged": {
+		"*.{js,jsx,ts,tsx,json,jsonc,css,md}": [
+			"biome check --write --files-ignore-unknown=true"
+		]
+	},
+	"devDependencies": {
+		"@types/bun": "latest",
+		"husky": "^9.1.7",
+		"lint-staged": "^16.2.6",
+		"turbo": "latest"
+	},
+	"peerDependencies": {
+		"typescript": "^5"
+	},
+	"packageManager": "bun@1.2.2",
+	"workspaces": ["apps/*", "packages/*"]
+}
