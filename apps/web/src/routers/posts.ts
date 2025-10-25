@@ -34,11 +34,6 @@ export const postsRouter = createTRPCRouter({
 	getLatest: protectedProcedure.query(async ({ ctx }): Promise<Post | null> => {
 		logger.info("Getting latest post", { userId: ctx.user.id });
 
-		if (!ctx.user.id) {
-			logger.error("User ID is required", { userId: ctx.user.id });
-			throw new TRPCError({ code: "UNAUTHORIZED" });
-		}
-
 		const post = await ctx.db.query.posts.findFirst({
 			where: eq(posts.userId, ctx.user.id),
 			orderBy: [desc(posts.createdAt)],
