@@ -6,6 +6,7 @@ import { PostsList } from "./components/posts-list";
 /**
  * Posts page with server-side prefetching and client-side error handling.
  *
+ * Authentication is handled by the layout (see layout.tsx).
  * Server-side errors are logged and tracked, then the page falls back to
  * client-side data fetching with the usePosts hook in PostsList component.
  */
