@@ -8,6 +8,34 @@
 			"when": 1761409875568,
 			"tag": "0000_useful_havok",
 			"breakpoints": true
+		},
+		{
+			"idx": 1,
+			"version": "7",
+			"when": 1761430372789,
+			"tag": "0001_pale_jane_foster",
+			"breakpoints": true
+		},
+		{
+			"idx": 2,
+			"version": "7",
+			"when": 1761431412958,
+			"tag": "0002_pretty_madame_masque",
+			"breakpoints": true
+		},
+		{
+			"idx": 3,
+			"version": "7",
+			"when": 1761431598213,
+			"tag": "0003_right_tempest",
+			"breakpoints": true
+		},
+		{
+			"idx": 4,
+			"version": "7",
+			"when": 1761431961160,
+			"tag": "0004_even_reaper",
+			"breakpoints": true
 		}
 	]
 }

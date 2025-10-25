@@ -1,0 +1,1 @@
+ALTER TABLE "pws-base_account" ADD COLUMN "updatedAt" timestamp with time zone;

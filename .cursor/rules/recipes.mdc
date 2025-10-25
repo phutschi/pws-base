@@ -1,0 +1,114 @@
+# Quick Recipes
+
+## New tRPC Router
+
+```typescript
+// 1. routers/users.ts
+import { z } from "zod";
+import { createTRPCRouter, publicProcedure, protectedProcedure } from "~/server/trpc";
+import { users } from "@repo/db/schema";
+
+export const usersRouter = createTRPCRouter({
+  getById: publicProcedure
+    .input(z.object({ id: z.string() }))
+    .query(async ({ ctx, input }): Promise<User | null> => {
+      return await ctx.db.query.users.findFirst({
+        where: eq(users.id, input.id),
+      });
+    }),
+});
+
+// 2. routers/index.ts
+export * from "./users";
+
+// 3. server/api.ts
+export const appRouter = createTRPCRouter({
+  posts: postsRouter,
+  users: usersRouter, // Add here
+});
+```
+
+## New Database Table
+
+```typescript
+// 1. packages/db/src/schema.ts
+export const comments = createTable(
+  "comment",
+  (d) => ({
+    id: d.integer().primaryKey().generatedByDefaultAsIdentity(),
+    content: d.text().notNull(),
+    postId: d.integer()
+      .references(() => posts.id, { onDelete: "cascade" }),
+    userId: d.text()
+      .references(() => users.id, { onDelete: "cascade" }),
+    createdAt: d.timestamp({ withTimezone: true })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+  }),
+  (t) => [
+    index("comment_post_id_idx").on(t.postId),
+    index("comment_user_id_idx").on(t.userId),
+  ],
+);
+
+// 2. Generate migration
+// bun run db:generate
+
+// 3. Apply migration
+// bun run db:migrate
+```
+
+## New Environment Variable
+
+```typescript
+// 1. .env.local
+NEW_API_KEY="your-key"
+
+// 2. apps/web/src/env.js
+server: {
+  NEW_API_KEY: z.string().min(1),
+},
+runtimeEnv: {
+  NEW_API_KEY: process.env.NEW_API_KEY,
+},
+
+// 3. .env.example
+NEW_API_KEY="your-key-here"
+
+// 4. Use
+import { env } from "~/env";
+const key = env.NEW_API_KEY;
+```
+
+## Common Commands
+
+```bash
+# Development
+bun run dev
+
+# Database
+bun run db:generate    # Generate migration
+bun run db:migrate     # Run migrations
+bun run db:push        # Push schema (dev only)
+bun run db:studio      # Open Drizzle Studio
+
+# Quality
+bun run check          # Lint & format
+bun run check:write    # Fix issues
+bun run check:types    # Type check
+bun test               # Run tests
+
+# Build
+bun run build
+```
+
+## Git Commits
+
+```bash
+feat: add user profile page
+fix: resolve auth token expiration
+refactor: simplify error handling
+docs: update API documentation
+perf: add database indexes
+test: add unit tests for hooks
+```

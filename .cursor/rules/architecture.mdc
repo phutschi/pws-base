@@ -1,0 +1,41 @@
+---
+alwaysApply: true
+---
+
+# Architecture
+
+## Monorepo Structure
+
+```
+apps/web/              # Next.js application
+├── src/app/          # App Router (file-based routing)
+├── src/routers/      # tRPC routers (API layer)
+├── src/server/       # Server utilities (db, trpc, auth)
+└── src/shared/       # Shared code (hooks, components, lib)
+
+packages/
+├── @repo/db          # Database (Drizzle + schema)
+├── @repo/ui          # UI components (Radix + Tailwind)
+├── @repo/tailwind-config
+└── @repo/typescript-config
+```
+
+## Dependency Rules
+
+✅ Apps can import from packages
+❌ Packages NEVER import from apps
+✅ Use workspace protocol: `"@repo/db": "workspace:*"`
+✅ Keep packages framework-agnostic
+
+## Import Order
+
+```typescript
+// 1. External dependencies
+import { z } from "zod";
+
+// 2. Workspace packages
+import { posts } from "@repo/db/schema";
+
+// 3. Relative imports
+import { publicProcedure } from "~/server/trpc";
+```

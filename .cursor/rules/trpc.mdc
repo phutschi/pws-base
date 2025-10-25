@@ -1,0 +1,79 @@
+---
+alwaysApply: true
+---
+
+# tRPC Patterns
+
+## Router Organization
+
+```typescript
+// routers/posts.ts - Domain-specific
+export const postsRouter = createTRPCRouter({
+  // Queries: read operations
+  getLatest: publicProcedure
+    .query(async ({ ctx }): Promise<Post | null> => { }),
+
+  // Mutations: write operations
+  create: protectedProcedure
+    .input(z.object({ name: z.string().min(1) }))
+    .mutation(async ({ ctx, input }): Promise<void> => { }),
+});
+
+// routers/index.ts - Re-export only
+export * from "./posts";
+
+// server/api.ts - Root router
+export const appRouter = createTRPCRouter({
+  posts: postsRouter,
+});
+```
+
+## Authentication
+
+```typescript
+// ✅ Public endpoints
+export const hello = publicProcedure.query(() => { });
+
+// ✅ Protected endpoints
+export const create = protectedProcedure
+  .mutation(async ({ ctx, input }) => {
+    // ctx.user guaranteed non-null
+    await ctx.db.insert(posts).values({
+      userId: ctx.user.id, // type-safe
+    });
+  });
+```
+
+## Input Validation
+
+```typescript
+// ✅ ALWAYS validate with Zod
+.input(z.object({
+  name: z.string().min(1).max(256),
+  email: z.string().email(),
+}))
+
+// ✅ Transform for sanitization
+.input(z.object({
+  name: z.string().trim().min(1),
+  email: z.string().toLowerCase().email(),
+}))
+```
+
+## Return Types
+
+```typescript
+// ✅ Explicit return types
+.query(async ({ ctx }): Promise<Post | null> => { })
+.mutation(async ({ ctx, input }): Promise<void> => { })
+```
+
+## Error Handling
+
+```typescript
+import { TRPCError } from "@trpc/server";
+
+throw new TRPCError({ code: "UNAUTHORIZED" });
+throw new TRPCError({ code: "BAD_REQUEST", cause: zodError });
+throw new TRPCError({ code: "FORBIDDEN" });
+```

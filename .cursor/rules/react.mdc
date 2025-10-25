@@ -1,0 +1,108 @@
+---
+alwaysApply: true
+---
+
+# React Patterns
+
+## Server Components (Default)
+
+```typescript
+// app/posts/page.tsx
+export default async function PostsPage() {
+  try {
+    // ✅ Prefetch on server
+    await api.posts.getLatest.prefetch();
+
+    logger.info("Page rendered");
+  } catch (error) {
+    // ✅ Log & gracefully degrade
+    logger.error("Prefetch failed", { error });
+  }
+
+  return <PostsList />;
+}
+```
+
+## Client Components
+
+```typescript
+"use client"; // ✅ Required at top
+
+import { api } from "~/trpc/react";
+
+export function PostsList() {
+  // ✅ tRPC React Query hooks
+  const { data, isLoading, error } = api.posts.getLatest.useQuery();
+
+  const mutation = api.posts.create.useMutation({
+    onSuccess: () => {
+      logger.info("Created");
+    },
+  });
+
+  if (isLoading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error.message}</div>;
+
+  return <div>{data?.name}</div>;
+}
+```
+
+## Custom Hooks
+
+```typescript
+// shared/hooks/use-posts.ts
+export function usePosts(options?: {
+  onCreateSuccess?: () => void;
+}) {
+  const query = api.posts.getLatest.useQuery();
+  const utils = api.useUtils();
+
+  const mutation = api.posts.create.useMutation({
+    onSuccess: () => {
+      options?.onCreateSuccess?.();
+      void utils.posts.getLatest.invalidate(); // ✅ Refetch
+    },
+  });
+
+  return {
+    post: query.data,
+    isLoading: query.isLoading,
+    createPost: (name: string) => mutation.mutateAsync({ name }),
+  };
+}
+```
+
+## Hook Rules
+
+```typescript
+// ✅ Call at top level
+const [state, setState] = useState();
+const query = api.posts.getLatest.useQuery();
+
+// ❌ Don't call conditionally
+if (condition) {
+  const data = useQuery(); // FORBIDDEN
+}
+
+// ✅ Use useCallback for memoized callbacks
+const handleClick = useCallback(() => {
+  doSomething(id);
+}, [id]);
+```
+
+## Component Props
+
+```typescript
+// ✅ Use readonly for props
+interface Props {
+  readonly name: string;
+  readonly onSubmit: (data: FormData) => void;
+}
+
+// ✅ Destructure with defaults
+function Button({
+  variant = "default",
+  size = "default",
+  ...props
+}: ButtonProps) { }
+```

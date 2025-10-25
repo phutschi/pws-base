@@ -11,7 +11,8 @@
 		"check:unsafe": "turbo check:unsafe",
 		"check:write": "turbo check:write",
 		"lint": "turbo lint",
-		"prepare": "husky"
+		"prepare": "husky",
+		"test": "turbo test"
 	},
 	"lint-staged": {
 		"*.{js,jsx,ts,tsx,json,jsonc,css,md}": [

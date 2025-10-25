@@ -1,0 +1,98 @@
+---
+alwaysApply: true
+---
+
+# Quick Reference
+
+## Type Imports
+
+```typescript
+import type { NextPage } from "next";
+import type { InferSelectModel } from "drizzle-orm";
+import type { RouterOutputs } from "~/trpc/react";
+```
+
+## Common Utilities
+
+```typescript
+import { cn } from "@repo/ui/lib/utils";           // Tailwind merge
+import { logger } from "~/shared/lib/logger";       // Logging
+import { defaultErrorTracker } from "~/shared/lib"; // Error tracking
+```
+
+## tRPC Hooks
+
+```typescript
+// Query
+api.posts.getLatest.useQuery();
+
+// Mutation
+api.posts.create.useMutation();
+
+// Utils
+const utils = api.useUtils();
+await utils.posts.getLatest.invalidate();
+
+// Server prefetch
+await api.posts.getLatest.prefetch();
+```
+
+## Database Operations
+
+```typescript
+// Query
+ctx.db.query.posts.findFirst();
+
+// Insert
+ctx.db.insert(posts).values({});
+
+// Update
+ctx.db.update(posts).set({}).where(eq());
+
+// Delete
+ctx.db.delete(posts).where(eq());
+
+// Transaction
+await ctx.db.transaction(async (tx) => {
+  await tx.insert(posts).values({});
+});
+```
+
+## Common Patterns
+
+```typescript
+// Server Component
+export default async function Page() {
+  await api.posts.prefetch();
+  return <Component />;
+}
+
+// Client Component
+"use client";
+export function Component() {
+  const { data } = api.posts.useQuery();
+  return <div>{data}</div>;
+}
+
+// Protected Route
+export const create = protectedProcedure
+  .input(z.object({ name: z.string() }))
+  .mutation(async ({ ctx, input }) => {
+    await ctx.db.insert(posts).values({
+      userId: ctx.user.id,
+    });
+  });
+```
+
+## Anti-Patterns
+
+```typescript
+// ❌ Avoid
+any type
+enum keyword
+console.log()
+process.env.* (outside env.js)
+class components
+@ts-ignore
+default exports (except pages)
+```

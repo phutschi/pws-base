@@ -1,0 +1,38 @@
+---
+alwaysApply: true
+---
+
+# Project Overview
+
+**Next.js 16 + tRPC Monorepo**
+
+## Tech Stack
+
+- **Framework**: Next.js 16 (App Router) + React 19
+- **API**: tRPC 11 + TanStack Query
+- **Database**: PostgreSQL + Drizzle ORM
+- **Auth**: Better Auth
+- **UI**: Radix UI + Tailwind v4 + CVA
+- **Monorepo**: Turborepo + Bun
+- **Type Safety**: Strict TypeScript
+
+## Core Principles
+
+✅ **End-to-end type safety** (database → API → UI)
+✅ **Strict validation** (Zod schemas everywhere)
+✅ **Server Components first** (RSC by default)
+✅ **Structured logging** (no console.log)
+✅ **Protected by default** (explicit public routes)
+✅ **Performance-first** (indexes, caching, prefetching)
+
+## Package Manager
+
+Use **Bun** for all operations:
+```bash
+bun install          # Install dependencies
+bun run dev          # Development server
+bun run build        # Production build
+bun run check        # Lint & format
+bun run check:types  # Type checking
+bun test             # Run tests
+```

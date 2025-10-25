@@ -1,0 +1,64 @@
+---
+alwaysApply: true
+---
+
+# TypeScript Standards
+
+## Strict Mode Requirements
+
+```typescript
+// ✅ ALWAYS use strict types
+type Post = InferSelectModel<typeof posts>;
+
+// ✅ ALWAYS explicit return types
+async function getPost(): Promise<Post | null> { }
+
+// ✅ Use readonly for immutable data
+interface User {
+  readonly id: string;
+  readonly email: string;
+  name: string; // mutable
+}
+
+// ❌ NEVER use any
+const data: any = response; // FORBIDDEN
+```
+
+## Type Patterns
+
+```typescript
+// ✅ Const assertions for constants
+const ROLES = ["admin", "user"] as const;
+type Role = typeof ROLES[number];
+
+// ✅ Use type inference where obvious
+const count = 5; // inferred as number
+
+// ✅ Prefer unions over enums
+export const Status = {
+  Active: "active",
+  Inactive: "inactive",
+} as const;
+
+// ❌ Don't use enum
+enum Status { Active, Inactive } // FORBIDDEN
+```
+
+## Type Inference Chain
+
+```typescript
+// Database → Drizzle → tRPC → React Query
+import type { InferSelectModel } from "drizzle-orm";
+type Post = InferSelectModel<typeof posts>;
+
+export type RouterInputs = inferRouterInputs<AppRouter>;
+export type RouterOutputs = inferRouterOutputs<AppRouter>;
+```
+
+## Avoid
+
+- `any` type
+- `enum` keyword
+- Type assertions (`as`) without justification
+- Null and undefined mixed
+- `@ts-ignore` comments

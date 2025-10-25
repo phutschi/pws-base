@@ -1,0 +1,77 @@
+---
+alwaysApply: true
+---
+# Authentication & Authorization
+
+## Context Setup
+
+```typescript
+// server/trpc.ts
+export const createTRPCContext = async (opts: { headers: Headers }) => {
+  const session = await auth.api.getSession({ headers: opts.headers });
+
+  return {
+    db,
+    session: session?.session ?? null,
+    user: session?.user ?? null,
+    ...opts,
+  };
+};
+```
+
+## Protected Procedures
+
+```typescript
+export const protectedProcedure = t.procedure
+  .use(timingMiddleware)
+  .use(async ({ ctx, next }) => {
+    if (!ctx.session || !ctx.user) {
+      throw new TRPCError({ code: "UNAUTHORIZED" });
+    }
+
+    return next({
+      ctx: {
+        // ✅ Type narrowing - guaranteed non-null
+        session: ctx.session,
+        user: ctx.user,
+      },
+    });
+  });
+```
+
+## Route Protection
+
+```typescript
+// ✅ Public endpoints
+export const hello = publicProcedure.query(() => { });
+
+// ✅ Protected endpoints
+export const createPost = protectedProcedure
+  .input(z.object({ name: z.string() }))
+  .mutation(async ({ ctx, input }) => {
+    // ctx.user.id guaranteed to exist
+    await ctx.db.insert(posts).values({
+      name: input.name,
+      userId: ctx.user.id,
+    });
+  });
+```
+
+## Ownership Checks
+
+```typescript
+export const deletePost = protectedProcedure
+  .input(z.object({ id: z.number() }))
+  .mutation(async ({ ctx, input }) => {
+    const post = await ctx.db.query.posts.findFirst({
+      where: eq(posts.id, input.id),
+    });
+
+    // ✅ Check ownership
+    if (post?.userId !== ctx.user.id) {
+      throw new TRPCError({ code: "FORBIDDEN" });
+    }
+
+    await ctx.db.delete(posts).where(eq(posts.id, input.id));
+  });
+```

@@ -1,0 +1,82 @@
+---
+alwaysApply: true
+---
+
+# Performance Optimization
+
+## Database Performance
+
+```typescript
+// ✅ Add indexes for queried fields
+index("user_email_idx").on(t.email),
+index("post_created_at_idx").on(t.createdAt),
+index("post_user_id_idx").on(t.userId), // FK indexes
+
+// ✅ Use select to limit columns
+const posts = await db.select({
+  id: posts.id,
+  name: posts.name
+}).from(posts);
+
+// ✅ Paginate with limits
+.limit(10).offset(page * 10)
+```
+
+## React Query Optimization
+
+```typescript
+// ✅ Set stale times for stable data
+api.posts.getLatest.useQuery(undefined, {
+  staleTime: 1000 * 60 * 5, // 5 minutes
+});
+
+// ✅ Prefetch on server
+await api.posts.getLatest.prefetch();
+
+// ✅ Invalidate after mutations
+const utils = api.useUtils();
+await utils.posts.getLatest.invalidate();
+```
+
+## Development Tools
+
+```typescript
+// ✅ Conditionally render dev tools
+{process.env.NODE_ENV === "development" && (
+  <ReactQueryDevtools initialIsOpen={false} />
+)}
+
+// ✅ Dev-only timing middleware
+if (t._config.isDev) {
+  await new Promise(resolve => setTimeout(resolve, waitMs));
+}
+```
+
+## Server Components
+
+```typescript
+// ✅ Use Server Components by default
+export default async function Page() {
+  // Fetch on server
+  await api.posts.prefetch();
+  return <ClientComponent />;
+}
+
+// ✅ Client Components only when needed
+"use client";
+export function InteractiveComponent() { }
+```
+
+## Image Optimization
+
+```typescript
+// ✅ Use Next.js Image component
+import Image from "next/image";
+
+<Image
+  src="/photo.jpg"
+  alt="Photo"
+  width={800}
+  height={600}
+/>
+```

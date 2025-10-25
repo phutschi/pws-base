@@ -1,0 +1,75 @@
+---
+alwaysApply: true
+---
+
+# Security Guidelines
+
+## Input Validation
+
+```typescript
+// ✅ ALWAYS validate with Zod
+.input(z.object({
+  name: z.string().min(1).max(256),
+  email: z.string().email(),
+  age: z.number().int().positive().max(150),
+}))
+
+// ✅ Transform for sanitization
+.input(z.object({
+  name: z.string().trim().min(1),
+  email: z.string().toLowerCase().email(),
+}))
+```
+
+## SQL Injection Prevention
+
+```typescript
+// ✅ Always use Drizzle query builder (safe)
+const user = await db.query.users.findFirst({
+  where: eq(users.email, email),
+});
+
+// ❌ NEVER use raw SQL with interpolation
+sql`SELECT * FROM users WHERE email = '${email}'` // DANGEROUS
+```
+
+## Environment Variables
+
+```typescript
+// ✅ Use validated env
+import { env } from "~/env";
+const dbUrl = env.DATABASE_URL;
+
+// ❌ NEVER access process.env directly
+const dbUrl = process.env.DATABASE_URL; // FORBIDDEN
+```
+
+## Environment Files
+
+```bash
+# ✅ .env.local (gitignored)
+DATABASE_URL="postgresql://..."
+BETTER_AUTH_SECRET="min-32-chars-secret"
+
+# ✅ .env.example (committed)
+DATABASE_URL="postgresql://postgres:password@localhost:5432/db"
+BETTER_AUTH_SECRET="your-secret-here-min-32-chars"
+```
+
+## Secrets Management
+
+- ❌ Never commit `.env.local`
+- ✅ Always provide `.env.example`
+- ✅ Validate all env vars with Zod
+- ✅ Use minimum length requirements for secrets
+- ❌ Never log secrets
+
+## XSS Prevention
+
+```typescript
+// ✅ React escapes by default
+<div>{userInput}</div>
+
+// ⚠️ Only use dangerouslySetInnerHTML for trusted content
+// (e.g., CSS generation from typed config)
+```

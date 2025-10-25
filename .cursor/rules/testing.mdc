@@ -1,0 +1,65 @@
+---
+alwaysApply: true
+---
+
+# Testing Patterns
+
+## Test Structure
+
+```typescript
+// ✅ Co-locate tests with source
+src/
+├── components/
+│   ├── button.tsx
+│   └── button.test.tsx
+├── hooks/
+│   ├── use-posts.ts
+│   └── use-posts.test.ts
+```
+
+## Test Naming
+
+```typescript
+describe("usePosts", () => {
+  it("should fetch latest post on mount", async () => { });
+  it("should handle create mutation success", async () => { });
+  it("should invalidate queries after mutation", async () => { });
+});
+```
+
+## Testing Patterns
+
+```typescript
+import { renderHook, waitFor } from "@testing-library/react";
+import { usePosts } from "./use-posts";
+
+// ✅ Test user-facing behavior
+it("should create post and refetch data", async () => {
+  const { result } = renderHook(() => usePosts());
+
+  await result.current.createPost("New Post");
+
+  await waitFor(() => {
+    expect(result.current.post?.name).toBe("New Post");
+  });
+});
+```
+
+## Run Tests
+
+```bash
+# Unit tests
+bun test
+
+# Watch mode
+bun test --watch
+
+# UI mode
+bun run test:ui
+```
+
+## Coverage Goals
+
+- Unit tests: ≥80%
+- Integration tests: ≥70%
+- E2E tests: Critical paths

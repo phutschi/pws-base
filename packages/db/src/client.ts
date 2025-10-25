@@ -5,12 +5,6 @@ import postgres from "postgres";
 
 import * as schema from "./schema";
 
-const getEnvVariable = (name: string) => {
-	const value = process.env[name];
-	if (value == null) throw new Error(`environment variable ${name} not found`);
-	return value;
-};
-
 export const client = postgres(env.DATABASE_URL as string);
 
 export const db = drizzle(client, { schema });

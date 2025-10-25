@@ -1,0 +1,90 @@
+---
+alwaysApply: true
+---
+
+# Naming Conventions
+
+## File Naming
+
+**Next.js App Router**:
+```
+app/
+├── layout.tsx           # Root layout
+├── page.tsx             # Home page
+├── loading.tsx          # Loading UI
+├── error.tsx            # Error boundary
+├── posts/
+│   ├── page.tsx         # /posts route
+│   ├── components/      # Page-specific
+│   │   └── posts-list.tsx
+│   └── hooks/
+│       └── use-posts.ts
+```
+
+**Components**: `kebab-case.tsx`
+- `posts-list.tsx`
+- `theme-toggle.tsx`
+- `user-profile.tsx`
+
+**Hooks**: `use-*.ts`
+- `use-posts.ts`
+- `use-error-handler.ts`
+- `use-auth.ts`
+
+**Utilities**: `kebab-case.ts`
+- `logger.ts`
+- `error-tracker.tsx`
+- `date-utils.ts`
+
+## Import Conventions
+
+```typescript
+// 1. External dependencies
+import { z } from "zod";
+import { createTRPCRouter } from "@trpc/server";
+
+// 2. Workspace packages
+import { posts } from "@repo/db/schema";
+import { Button } from "@repo/ui";
+
+// 3. Relative imports
+import { publicProcedure } from "~/server/trpc";
+import { logger } from "~/shared/lib/logger";
+import type { Post } from "~/types";
+```
+
+## Barrel Exports
+
+```typescript
+// ✅ Use barrel exports
+// shared/lib/index.ts
+export * from "./logger";
+export * from "./error-tracker";
+
+// Usage
+import { logger, defaultErrorTracker } from "~/shared/lib";
+```
+
+## Variable Naming
+
+```typescript
+// ✅ Descriptive names
+const userEmail = "user@example.com";
+const isLoading = true;
+const handleSubmit = () => { };
+
+// ✅ Boolean prefixes
+const isActive = true;
+const hasPermission = false;
+const canDelete = true;
+
+// ✅ Constants
+const MAX_RETRIES = 3;
+const API_TIMEOUT = 5000;
+```
+
+## Avoid
+
+- ❌ Default exports (except Next.js pages)
+- ❌ Single letter variables (except loop counters)
+- ❌ Abbreviations (unless standard: `id`, `url`, `api`)

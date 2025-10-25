@@ -1,0 +1,78 @@
+---
+alwaysApply: true
+---
+
+# Error Handling
+
+## Structured Logging
+
+```typescript
+import { logger } from "~/shared/lib/logger";
+
+// ✅ Use logger (not console)
+logger.info("Operation successful", { userId: user.id });
+logger.error("Operation failed", {
+  message: error.message,
+  stack: error.stack,
+});
+
+// ❌ NEVER use console
+console.log("Debug"); // FORBIDDEN in production
+```
+
+## Error Tracking
+
+```typescript
+import { defaultErrorTracker } from "~/shared/lib";
+
+try {
+  await riskyOperation();
+} catch (error) {
+  const err = error as Error;
+
+  // ✅ Log structured
+  logger.error("Operation failed", {
+    message: err.message,
+    stack: err.stack,
+  });
+
+  // ✅ Track with service
+  defaultErrorTracker.captureException(err, {
+    tags: { source: "server", operation: "risky" },
+  });
+
+  // ✅ Re-throw or handle
+  throw new TRPCError({
+    code: "INTERNAL_SERVER_ERROR",
+    cause: err
+  });
+}
+```
+
+## tRPC Errors
+
+```typescript
+import { TRPCError } from "@trpc/server";
+
+// ✅ Use tRPC error codes
+throw new TRPCError({ code: "UNAUTHORIZED" });
+throw new TRPCError({ code: "BAD_REQUEST", cause: zodError });
+throw new TRPCError({ code: "FORBIDDEN" });
+throw new TRPCError({ code: "NOT_FOUND" });
+```
+
+## Server-Side Error Handling
+
+```typescript
+export default async function Page() {
+  try {
+    await api.posts.getLatest.prefetch();
+  } catch (error) {
+    // ✅ Log but don't throw - graceful degradation
+    logger.error("Prefetch failed", { error });
+    // Let client component handle fetching
+  }
+
+  return <Component />;
+}
+```

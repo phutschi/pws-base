@@ -96,7 +96,8 @@ export const usePosts = (options: UsePostsOptions = {}): UsePostsReturn => {
 				id: -Date.now(),
 				name: variables.name,
 				createdAt: new Date(),
-				updatedAt: null,
+				updatedAt: new Date(),
+				userId: null,
 			};
 
 			utils.posts.getLatest.setData(undefined, optimisticPost);
