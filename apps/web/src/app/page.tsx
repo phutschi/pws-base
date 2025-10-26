@@ -1,5 +1,6 @@
+"use client";
+
 import { Badge } from "@repo/ui/components/badge";
-import { Button } from "@repo/ui/components/button";
 import {
 	Card,
 	CardDescription,
@@ -7,49 +8,258 @@ import {
 	CardTitle,
 } from "@repo/ui/components/card";
 import { Separator } from "@repo/ui/components/separator";
+import { motion, useInView } from "framer-motion";
+import { useRef } from "react";
 
 import { ThemeToggle } from "~/shared/components/theme-toggle";
 
+const features = [
+	{
+		title: "Lightning Fast",
+		description:
+			"Built on Next.js 16 with Turbo mode for instant hot module replacement and optimized build times.",
+		icon: (
+			<svg
+				className="h-6 w-6 text-blue-600 dark:text-blue-400"
+				fill="none"
+				viewBox="0 0 24 24"
+				stroke="currentColor"
+			>
+				<title>Lightning Fast</title>
+				<path
+					strokeLinecap="round"
+					strokeLinejoin="round"
+					strokeWidth={2}
+					d="M13 10V3L4 14h7v7l9-11h-7z"
+				/>
+			</svg>
+		),
+		color: "blue",
+	},
+	{
+		title: "Type-Safe API",
+		description:
+			"End-to-end type safety with tRPC and TypeScript. No code generation, just pure TypeScript magic.",
+		icon: (
+			<svg
+				className="h-6 w-6 text-purple-600 dark:text-purple-400"
+				fill="none"
+				viewBox="0 0 24 24"
+				stroke="currentColor"
+			>
+				<title>Type-Safe</title>
+				<path
+					strokeLinecap="round"
+					strokeLinejoin="round"
+					strokeWidth={2}
+					d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+				/>
+			</svg>
+		),
+		color: "purple",
+	},
+	{
+		title: "Modern Database",
+		description:
+			"Drizzle ORM with PostgreSQL for a powerful, type-safe, and flexible data layer with migrations.",
+		icon: (
+			<svg
+				className="h-6 w-6 text-green-600 dark:text-green-400"
+				fill="none"
+				viewBox="0 0 24 24"
+				stroke="currentColor"
+			>
+				<title>Modern Database</title>
+				<path
+					strokeLinecap="round"
+					strokeLinejoin="round"
+					strokeWidth={2}
+					d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"
+				/>
+			</svg>
+		),
+		color: "green",
+	},
+	{
+		title: "Authentication",
+		description:
+			"Better Auth integration with session management, OAuth providers, and secure authentication flows.",
+		icon: (
+			<svg
+				className="h-6 w-6 text-amber-600 dark:text-amber-400"
+				fill="none"
+				viewBox="0 0 24 24"
+				stroke="currentColor"
+			>
+				<title>Authentication</title>
+				<path
+					strokeLinecap="round"
+					strokeLinejoin="round"
+					strokeWidth={2}
+					d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+				/>
+			</svg>
+		),
+		color: "amber",
+	},
+	{
+		title: "Beautiful UI",
+		description:
+			"Radix UI components with Tailwind CSS v4 for accessible, customizable, and modern interfaces.",
+		icon: (
+			<svg
+				className="h-6 w-6 text-pink-600 dark:text-pink-400"
+				fill="none"
+				viewBox="0 0 24 24"
+				stroke="currentColor"
+			>
+				<title>Beautiful UI</title>
+				<path
+					strokeLinecap="round"
+					strokeLinejoin="round"
+					strokeWidth={2}
+					d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"
+				/>
+			</svg>
+		),
+		color: "pink",
+	},
+	{
+		title: "Monorepo Ready",
+		description:
+			"Turborepo with Bun for blazing fast builds, caching, and efficient package management.",
+		icon: (
+			<svg
+				className="h-6 w-6 text-cyan-600 dark:text-cyan-400"
+				fill="none"
+				viewBox="0 0 24 24"
+				stroke="currentColor"
+			>
+				<title>Monorepo Ready</title>
+				<path
+					strokeLinecap="round"
+					strokeLinejoin="round"
+					strokeWidth={2}
+					d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+				/>
+			</svg>
+		),
+		color: "cyan",
+	},
+	{
+		title: "Testing First",
+		description:
+			"Vitest and Testing Library for fast, modern testing with excellent TypeScript support.",
+		icon: (
+			<svg
+				className="h-6 w-6 text-emerald-600 dark:text-emerald-400"
+				fill="none"
+				viewBox="0 0 24 24"
+				stroke="currentColor"
+			>
+				<title>Testing First</title>
+				<path
+					strokeLinecap="round"
+					strokeLinejoin="round"
+					strokeWidth={2}
+					d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"
+				/>
+			</svg>
+		),
+		color: "emerald",
+	},
+	{
+		title: "Developer Experience",
+		description:
+			"Strict TypeScript, hot reload, structured logging, and error tracking for productive development.",
+		icon: (
+			<svg
+				className="h-6 w-6 text-indigo-600 dark:text-indigo-400"
+				fill="none"
+				viewBox="0 0 24 24"
+				stroke="currentColor"
+			>
+				<title>Developer Experience</title>
+				<path
+					strokeLinecap="round"
+					strokeLinejoin="round"
+					strokeWidth={2}
+					d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5"
+				/>
+			</svg>
+		),
+		color: "indigo",
+	},
+];
+
+function FeatureCard({
+	feature,
+	index,
+}: {
+	feature: (typeof features)[0];
+	index: number;
+}) {
+	const ref = useRef(null);
+	const isInView = useInView(ref, { once: true, margin: "-100px" });
+
+	return (
+		<motion.div
+			ref={ref}
+			initial={{ opacity: 0, y: 20 }}
+			animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+			transition={{
+				duration: 0.5,
+				delay: index * 0.1,
+				ease: [0.21, 0.47, 0.32, 0.98],
+			}}
+		>
+			<Card className="h-full transition-all hover:shadow-md hover:border-primary/20">
+				<CardHeader>
+					<div
+						className={`mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-${feature.color}-500/10 dark:bg-${feature.color}-500/20`}
+					>
+						{feature.icon}
+					</div>
+					<CardTitle className="text-xl">{feature.title}</CardTitle>
+					<CardDescription>{feature.description}</CardDescription>
+				</CardHeader>
+			</Card>
+		</motion.div>
+	);
+}
+
 export default function HomePage() {
 	return (
-		<div className="flex min-h-screen flex-col bg-linear-to-br from-background to-muted">
+		<div className="flex min-h-screen flex-col bg-background">
 			{/* Header */}
-			<header className="border-b border-border bg-card/80 backdrop-blur-sm">
+			<header className="border-b border-border bg-card/80 backdrop-blur-sm sticky top-0 z-50">
 				<div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
 					<div className="flex h-16 items-center justify-between">
 						<div className="flex items-center gap-2">
-							<div className="h-8 w-8 rounded-lg bg-linear-to-br from-blue-500 to-purple-600" />
+							<div className="h-8 w-8 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600" />
 							<span className="text-xl font-semibold text-foreground">
 								pws base
 							</span>
 						</div>
-						<nav className="flex items-center gap-4">
-							<div className="hidden items-center gap-8 md:flex">
-								<Button variant="ghost" size="sm" asChild>
-									<a href="#features">Features</a>
-								</Button>
-								<Button variant="ghost" size="sm" asChild>
-									<a href="#docs">Docs</a>
-								</Button>
-								<Button variant="ghost" size="sm" asChild>
-									<a href="#about">About</a>
-								</Button>
-							</div>
-							<ThemeToggle />
-						</nav>
+						<ThemeToggle />
 					</div>
 				</div>
 			</header>
 
 			{/* Hero Section */}
 			<main className="mx-auto flex-1 max-w-7xl px-4 sm:px-6 lg:px-8">
-				<div className="py-24 text-center sm:py-32">
+				<motion.div
+					initial={{ opacity: 0, y: 10 }}
+					animate={{ opacity: 1, y: 0 }}
+					transition={{ duration: 0.6, ease: [0.21, 0.47, 0.32, 0.98] }}
+					className="py-24 text-center sm:py-32"
+				>
 					<Badge variant="secondary" className="mb-4">
 						New: Next.js 16 Ready
 					</Badge>
 					<h1 className="text-5xl font-bold tracking-tight text-foreground sm:text-6xl lg:text-7xl">
 						Build faster with{" "}
-						<span className="bg-linear-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+						<span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
 							pws base
 						</span>
 					</h1>
@@ -58,100 +268,35 @@ export default function HomePage() {
 						ORM, and Tailwind CSS. Everything you need to ship your next
 						project.
 					</p>
-					<div className="mt-10 flex items-center justify-center gap-4">
-						<Button
-							size="lg"
-							className="bg-linear-to-r from-blue-600 to-purple-600"
-						>
-							Get Started
-						</Button>
-						<Button variant="outline" size="lg">
-							View on GitHub
-						</Button>
-					</div>
-				</div>
+				</motion.div>
 
 				<Separator className="my-12" />
 
 				{/* Features Grid */}
 				<div id="features" className="pb-24">
-					<div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-						<Card className="transition-all hover:shadow-md">
-							<CardHeader>
-								<div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-blue-500/10 dark:bg-blue-500/20">
-									<svg
-										className="h-6 w-6 text-blue-600 dark:text-blue-400"
-										fill="none"
-										viewBox="0 0 24 24"
-										stroke="currentColor"
-									>
-										<title>Lightning Fast</title>
-										<path
-											strokeLinecap="round"
-											strokeLinejoin="round"
-											strokeWidth={2}
-											d="M13 10V3L4 14h7v7l9-11h-7z"
-										/>
-									</svg>
-								</div>
-								<CardTitle className="text-xl">Lightning Fast</CardTitle>
-								<CardDescription>
-									Built on Next.js 15 with optimized performance out of the box.
-								</CardDescription>
-							</CardHeader>
-						</Card>
+					<motion.div
+						initial={{ opacity: 0 }}
+						animate={{ opacity: 1 }}
+						transition={{ duration: 0.5, delay: 0.2 }}
+						className="text-center mb-16"
+					>
+						<h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl mb-4">
+							Everything You Need
+						</h2>
+						<p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+							A comprehensive toolkit with best practices baked in, so you can
+							focus on building your product.
+						</p>
+					</motion.div>
 
-						<Card className="transition-all hover:shadow-md">
-							<CardHeader>
-								<div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-purple-500/10 dark:bg-purple-500/20">
-									<svg
-										className="h-6 w-6 text-purple-600 dark:text-purple-400"
-										fill="none"
-										viewBox="0 0 24 24"
-										stroke="currentColor"
-									>
-										<title>Type-Safe</title>
-										<path
-											strokeLinecap="round"
-											strokeLinejoin="round"
-											strokeWidth={2}
-											d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
-										/>
-									</svg>
-								</div>
-								<CardTitle className="text-xl">Type-Safe</CardTitle>
-								<CardDescription>
-									End-to-end type safety with TypeScript and tRPC for
-									bulletproof APIs.
-								</CardDescription>
-							</CardHeader>
-						</Card>
-
-						<Card className="transition-all hover:shadow-md">
-							<CardHeader>
-								<div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-green-500/10 dark:bg-green-500/20">
-									<svg
-										className="h-6 w-6 text-green-600 dark:text-green-400"
-										fill="none"
-										viewBox="0 0 24 24"
-										stroke="currentColor"
-									>
-										<title>Modern Database</title>
-										<path
-											strokeLinecap="round"
-											strokeLinejoin="round"
-											strokeWidth={2}
-											d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"
-										/>
-									</svg>
-								</div>
-								<CardTitle className="text-xl">Modern Database</CardTitle>
-								<CardDescription>
-									Drizzle ORM with PostgreSQL for a powerful, flexible data
-									layer.
-								</CardDescription>
-							</CardHeader>
-						</Card>
+					<div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
+						{features.map((feature, index) => (
+							<FeatureCard
+								key={feature.title}
+								feature={feature}
+								index={index}
+							/>
+						))}
 					</div>
 				</div>
 			</main>
